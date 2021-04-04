@@ -1,0 +1,76 @@
+package Test
+
+import (
+	"REST_API_example/Models"
+	"REST_API_example/database"
+	"github.com/jackc/pgx"
+	"testing"
+)
+
+func TestCRUDUser(t *testing.T) {
+	dbp, err := database.New("test", "Ee010800", "test")
+
+	if err != nil {
+		t.Error("Could not create database connection: ", err)
+	}
+
+	var TestModel = &Models.User{Login: "foo", Password: "bar"}
+
+	err = dbp.Create("users", TestModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+
+	var rows pgx.Rows
+
+	rows, err = dbp.ReadAll("users")
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	var ValidateModel Models.User
+
+	for rows.Next() {
+		err = rows.Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
+		if err != nil {
+			t.Error("Cannot serialize row: ", ValidateModel)
+		}
+	}
+	if !(ValidateModel.Login == TestModel.Login && ValidateModel.Password == TestModel.Password) {
+		t.Error("Test and Validation models are not equal")
+	} else {
+		var row pgx.Row
+
+		row, err = dbp.ReadOne("users", ValidateModel.Id)
+		if err != nil {
+			t.Error("could not read row:", err)
+		} else if row == nil {
+			t.Error("row is a nil pointer:", ValidateModel)
+		} else {
+			err = row.Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
+
+			if err != nil {
+				t.Error("Cannot serialize row: ", ValidateModel)
+			} else if !(ValidateModel.Login == TestModel.Login && ValidateModel.Password == TestModel.Password) {
+				t.Error("Test and Validation models are not equal")
+			}
+		}
+
+	}
+
+	err = dbp.DeleteOne("users", ValidateModel.Id)
+
+	if err != nil {
+		t.Error("could not delete row:", err)
+	}
+
+	err = dbp.DeleteAll("users")
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+}
