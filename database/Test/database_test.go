@@ -74,3 +74,46 @@ func TestCRUDUser(t *testing.T) {
 		t.Error("Could not insert model: ", err)
 	}
 }
+
+func TestDeveloperOneToOne(t *testing.T) {
+	dbp, err := database.New("test", "Ee010800", "test")
+
+	if err != nil {
+		t.Error("Could not create database connection: ", err)
+	}
+
+	var TestUserModel = &Models.User{Login: "foo", Password: "bar"}
+
+	err = dbp.Create("users", TestUserModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+
+	defer dbp.DeleteAll("users")
+
+	var rows pgx.Rows
+
+	rows, err = dbp.ReadAll("users")
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
+		if err != nil {
+			t.Error("Cannot serialize row: ", TestUserModel)
+		}
+	}
+
+	var TestDeveloperModel = &Models.Developer{OrgName: "roga", Section: "KoPbITA", UserId: TestUserModel}
+
+	err = dbp.Create("developers", TestDeveloperModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+}
