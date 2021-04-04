@@ -32,6 +32,8 @@ func TestCRUDUser(t *testing.T) {
 		t.Error("nil pointer: ")
 	}
 
+	defer rows.Close()
+
 	var ValidateModel Models.User
 
 	for rows.Next() {
@@ -45,7 +47,6 @@ func TestCRUDUser(t *testing.T) {
 		t.Error("Test and Validation models are not equal")
 	} else {
 		var row pgx.Row
-
 		row, err = dbp.ReadOne("users", ValidateModel.Id)
 		if err != nil {
 			t.Error("could not read row:", err)
@@ -101,6 +102,8 @@ func TestDeveloperOneToOne(t *testing.T) {
 	} else if rows == nil {
 		t.Error("nil pointer: ")
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
