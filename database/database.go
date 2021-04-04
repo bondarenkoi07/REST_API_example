@@ -58,6 +58,8 @@ func (d *Database) Create(tableName string, model IterableModel) error {
 		return errors.New(err.Error() + "\n" + SQLStatement)
 	}
 
+	defer conn.Release()
+
 	fmt.Println(SQLStatement)
 
 	tx, err := conn.Begin(d.ctx)
@@ -96,11 +98,10 @@ func (d *Database) Create(tableName string, model IterableModel) error {
 func (d *Database) ReadAll(tableName string) (pgx.Rows, error) {
 	SQLStatement := fmt.Sprintf("SELECT * FROM %s ORDER BY id", tableName)
 	conn, err := (*d).pool.Acquire(d.ctx)
-
 	if err != nil {
 		return nil, err
 	}
-
+	defer conn.Release()
 	rows, err := conn.Query(d.ctx, SQLStatement)
 
 	if err != nil {
@@ -118,22 +119,21 @@ func (d *Database) ReadOne(tableName string, id int64) (pgx.Row, error) {
 		return nil, err
 	}
 
+	defer conn.Release()
+
 	row := conn.QueryRow(d.ctx, SQLStatement, id)
 
 	return row, nil
 }
 
 func (d *Database) DeleteAll(tableName string) error {
-	SQLStatement := fmt.Sprintf("DELETE FROM %s ", tableName)
-
+	SQLStatement := fmt.Sprintf("DELETE FROM %s", tableName)
 	conn, err := (*d).pool.Acquire(d.ctx)
-
 	if err != nil {
 		return err
 	}
-
+	defer conn.Release()
 	_, err = conn.Exec(d.ctx, SQLStatement)
-
 	if err != nil {
 		return err
 	} else {
@@ -149,6 +149,8 @@ func (d *Database) DeleteOne(tableName string, id int64) error {
 	if err != nil {
 		return err
 	}
+
+	defer conn.Release()
 
 	ct, err := conn.Exec(d.ctx, SQLStatement, id)
 

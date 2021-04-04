@@ -40,6 +40,7 @@ func TestCRUDUser(t *testing.T) {
 			t.Error("Cannot serialize row: ", ValidateModel)
 		}
 	}
+
 	if !(ValidateModel.Login == TestModel.Login && ValidateModel.Password == TestModel.Password) {
 		t.Error("Test and Validation models are not equal")
 	} else {
@@ -51,6 +52,7 @@ func TestCRUDUser(t *testing.T) {
 		} else if row == nil {
 			t.Error("row is a nil pointer:", ValidateModel)
 		} else {
+
 			err = row.Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
 
 			if err != nil {
@@ -67,9 +69,7 @@ func TestCRUDUser(t *testing.T) {
 	if err != nil {
 		t.Error("could not delete row:", err)
 	}
-
 	err = dbp.DeleteAll("users")
-
 	if err != nil {
 		t.Error("Could not insert model: ", err)
 	}
