@@ -1,8 +1,8 @@
 package Test
 
 import (
-	"REST_API_example/Models"
-	"REST_API_example/database"
+	"../../Models"
+	"../../database"
 	"github.com/jackc/pgx"
 	"testing"
 )
