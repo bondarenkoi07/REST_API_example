@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/pgxpool"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
+	"strings"
 )
 
 type IterableModel interface {
@@ -59,8 +60,6 @@ func (d *Database) Create(tableName string, model IterableModel) error {
 	}
 
 	defer conn.Release()
-
-	fmt.Println(SQLStatement)
 
 	tx, err := conn.Begin(d.ctx)
 
@@ -124,6 +123,63 @@ func (d *Database) ReadOne(tableName string, id int64) (pgx.Row, error) {
 	row := conn.QueryRow(d.ctx, SQLStatement, id)
 
 	return row, nil
+}
+
+func (d *Database) Update(tableName string, id int64, model IterableModel) error {
+	cols, values := model.GetFields()
+	colSlice := strings.Split(cols, ",")
+	SQLStatement := fmt.Sprintf("UPDATE %s SET ", tableName)
+	placeholders := fmt.Sprintf("$%d", len(colSlice)+1)
+	for index, colName := range colSlice {
+		SQLStatement += fmt.Sprintf("%s = $%d,", colName, index+1)
+	}
+	l := len(SQLStatement)
+	SQLStatement = SQLStatement[:l-1]
+	conn, err := (*d).pool.Acquire(d.ctx)
+
+	if err != nil {
+		return err
+	} else if conn == nil {
+		return errors.New("Acquired nil pointer.")
+	}
+
+	defer conn.Release()
+
+	tx, err := conn.Begin(d.ctx)
+
+	if err != nil {
+		return err
+	} else if tx == nil {
+		return errors.New("Cannot start transaction.")
+	}
+
+	values = append(values, id)
+
+	ct, err := tx.Exec(d.ctx, SQLStatement+" where id ="+placeholders, values...)
+
+	if err != nil {
+		var superErr = tx.Rollback(d.ctx)
+		if superErr != nil {
+			superErr = errors.New(superErr.Error() + " thrown while handling ZeroRowsAffectedError" + "\n" + SQLStatement)
+			return errors.New(superErr.Error() + "\n" + err.Error() + "\n" + SQLStatement)
+		} else {
+			return err
+		}
+
+	} else if ct.RowsAffected() == 0 {
+		var superErr = tx.Rollback(d.ctx)
+		if superErr != nil {
+			superErr = errors.New(superErr.Error() + " thrown while handling ZeroRowsAffectedError" + "\n" + SQLStatement)
+		}
+		return superErr
+	} else {
+		err := tx.Commit(d.ctx)
+		if err != nil {
+			return err
+		} else {
+			return nil
+		}
+	}
 }
 
 func (d *Database) DeleteAll(tableName string) error {
