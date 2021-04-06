@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    command: go test  ./...
+    volumes:
+      - .:/go/src/github.com/bondarenkoi07/REST_API_example
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db

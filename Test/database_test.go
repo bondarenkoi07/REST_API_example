@@ -3,13 +3,18 @@ package Test
 import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/database"
+	"os"
 	"testing"
 
 	"github.com/jackc/pgx/v4"
 )
 
 func TestCRDUser(t *testing.T) {
-	dbp, err := database.New("test", "Ee010800", "test")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
+
+	dbp, err := database.New(user, password, databaseName)
 
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
