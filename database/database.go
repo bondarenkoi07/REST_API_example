@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
@@ -94,7 +94,7 @@ func (d *Database) Create(tableName string, model IterableModel) error {
 	}
 }
 
-func (d *Database) ReadAll(tableName string) (pgx.Rows, error) {
+func (d *Database) ReadAll(tableName string) (*pgx.Rows, error) {
 	SQLStatement := fmt.Sprintf("SELECT * FROM %s ORDER BY id", tableName)
 	conn, err := (*d).pool.Acquire(d.ctx)
 	if err != nil {
@@ -106,11 +106,11 @@ func (d *Database) ReadAll(tableName string) (pgx.Rows, error) {
 	if err != nil {
 		return nil, err
 	} else {
-		return rows, nil
+		return &rows, nil
 	}
 }
 
-func (d *Database) ReadOne(tableName string, id int64) (pgx.Row, error) {
+func (d *Database) ReadOne(tableName string, id int64) (*pgx.Row, error) {
 	SQLStatement := fmt.Sprintf("SELECT * FROM %s where id = $1", tableName)
 	conn, err := (*d).pool.Acquire(d.ctx)
 
@@ -122,7 +122,7 @@ func (d *Database) ReadOne(tableName string, id int64) (pgx.Row, error) {
 
 	row := conn.QueryRow(d.ctx, SQLStatement, id)
 
-	return row, nil
+	return &row, nil
 }
 
 func (d *Database) Update(tableName string, id int64, model IterableModel) error {

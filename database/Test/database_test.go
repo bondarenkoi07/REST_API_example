@@ -3,7 +3,7 @@ package Test
 import (
 	"../../Models"
 	"../../database"
-	"github.com/jackc/pgx"
+	"github.com/jackc/pgx/v4"
 	"testing"
 )
 
@@ -22,7 +22,7 @@ func TestCRDUser(t *testing.T) {
 		t.Error("Could not insert model: ", err)
 	}
 
-	var rows pgx.Rows
+	var rows *pgx.Rows
 
 	rows, err = dbp.ReadAll("users")
 
@@ -32,12 +32,12 @@ func TestCRDUser(t *testing.T) {
 		t.Error("nil pointer: ")
 	}
 
-	defer rows.Close()
+	defer (*rows).Close()
 
 	var ValidateModel Models.User
 
-	for rows.Next() {
-		err = rows.Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
+	for (*rows).Next() {
+		err = (*rows).Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
 		if err != nil {
 			t.Error("Cannot serialize row: ", ValidateModel)
 		}
@@ -46,7 +46,7 @@ func TestCRDUser(t *testing.T) {
 	if !(ValidateModel.Login == TestModel.Login && ValidateModel.Password == TestModel.Password) {
 		t.Error("Test and Validation models are not equal")
 	} else {
-		var row pgx.Row
+		var row *pgx.Row
 		row, err = dbp.ReadOne("users", ValidateModel.Id)
 		if err != nil {
 			t.Error("could not read row:", err)
@@ -54,7 +54,7 @@ func TestCRDUser(t *testing.T) {
 			t.Error("row is a nil pointer:", ValidateModel)
 		} else {
 
-			err = row.Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
+			err = (*row).Scan(&ValidateModel.Id, &ValidateModel.Login, &ValidateModel.Password)
 
 			if err != nil {
 				t.Error("Cannot serialize row: ", ValidateModel)
@@ -93,7 +93,7 @@ func TestDeveloperOneToOne(t *testing.T) {
 
 	defer dbp.DeleteAll("users")
 
-	var rows pgx.Rows
+	var rows *pgx.Rows
 
 	rows, err = dbp.ReadAll("users")
 
@@ -103,10 +103,10 @@ func TestDeveloperOneToOne(t *testing.T) {
 		t.Error("nil pointer: ")
 	}
 
-	defer rows.Close()
+	defer (*rows).Close()
 
-	for rows.Next() {
-		err = rows.Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
+	for (*rows).Next() {
+		err = (*rows).Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
 		if err != nil {
 			t.Error("Cannot serialize row: ", TestUserModel)
 		}
@@ -138,7 +138,7 @@ func TestUpdateModel(t *testing.T) {
 
 	defer dbp.DeleteAll("users")
 
-	var rows pgx.Rows
+	var rows *pgx.Rows
 
 	rows, err = dbp.ReadAll("users")
 
@@ -148,10 +148,10 @@ func TestUpdateModel(t *testing.T) {
 		t.Error("nil pointer: ")
 	}
 
-	defer rows.Close()
+	defer (*rows).Close()
 
-	for rows.Next() {
-		err = rows.Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
+	for (*rows).Next() {
+		err = (*rows).Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
 		if err != nil {
 			t.Error("Cannot serialize row: ", TestUserModel)
 		}
@@ -166,7 +166,7 @@ func TestUpdateModel(t *testing.T) {
 	}
 	var ValidateModel = &Models.User{Login: "foo", Password: "foo"}
 
-	var row pgx.Row
+	var row *pgx.Row
 	row, err = dbp.ReadOne("users", TestUserModel.Id)
 	if err != nil {
 		t.Error("could not read row:", err)
@@ -174,7 +174,7 @@ func TestUpdateModel(t *testing.T) {
 		t.Error("row is a nil pointer:", ValidateModel)
 	} else {
 
-		err = row.Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
+		err = (*row).Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
 
 		if err != nil {
 			t.Error("Cannot serialize row: ", ValidateModel)
