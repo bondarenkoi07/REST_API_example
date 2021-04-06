@@ -1,10 +1,11 @@
 package Test
 
 import (
-	"REST_API_example/Models"
-	"REST_API_example/database"
-	"github.com/jackc/pgx/v4"
+	"app/REST_API_example/Models"
+	"app/REST_API_example/database"
 	"testing"
+
+	"github.com/jackc/pgx/v4"
 )
 
 func TestCRDUser(t *testing.T) {
