@@ -3,10 +3,9 @@ package Service
 import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/database"
-	"crypto/sha256"
+	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"strconv"
 )
 
 type UserService struct {
@@ -80,14 +79,7 @@ func (us UserService) DeleteAll() error {
 }
 
 func (us UserService) Deserialize(data map[string]string) (error, Models.User) {
-	var validate bool
-	id, isSet := data["id"]
-	validate = validate && isSet
-
-	Id, err := strconv.Atoi(id)
-	if err != nil {
-		return err, Models.User{}
-	}
+	var validate = true
 
 	Name, isSet := data["login"]
 	validate = validate && isSet
@@ -98,13 +90,11 @@ func (us UserService) Deserialize(data map[string]string) (error, Models.User) {
 	if validate {
 		var user Models.User
 		user.Login = Name
-		hashPass := sha256.Sum256([]byte(password))
+		hashPass := md5.Sum([]byte(password))
 		user.Password = hex.EncodeToString(hashPass[:])
-
-		user.Id = int64(Id)
 
 		return nil, user
 	} else {
-		return errors.New("wrong JSON"), Models.User{}
+		return errors.New("wrong JSON "), Models.User{}
 	}
 }

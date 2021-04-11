@@ -1,10 +1,12 @@
+drop table users if exists;
+
+
 create table users(
     id serial not null,
-    login varchar(32) not null unique,
-    password varchar(32) not null,
+    login varchar(256) not null unique,
+    password varchar(256) not null,
     PRIMARY KEY(id)
 );
-
 
 
 create table developers(

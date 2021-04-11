@@ -20,13 +20,13 @@ type Database struct {
 	ctx  context.Context
 }
 
-func New(user, password, databaseName string) (*Database, error) {
+func New(user, password, connection, databaseName string) (*Database, error) {
 	var ctx context.Context
 	var pool *pgxpool.Pool
 
 	ctx = context.Background()
 
-	dsn := fmt.Sprintf("postgres://%s:%s@db:5432/%s", user, password, databaseName)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:5432/%s", user, password, connection, databaseName)
 	var err error
 	pool, err = pgxpool.Connect(ctx, dsn)
 

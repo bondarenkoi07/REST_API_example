@@ -79,13 +79,6 @@ func (ps ProductService) DeleteAll() error {
 
 func (ps *ProductService) Deserialize(data map[string]string, devService DeveloperService, marketService MarketService) (error, Models.Product) {
 	var validate bool
-	id, isSet := data["id"]
-	validate = validate && isSet
-
-	Id, err := strconv.Atoi(id)
-	if err != nil {
-		return err, Models.Product{}
-	}
 
 	name, isSet := data["name"]
 	validate = validate && isSet
@@ -125,7 +118,6 @@ func (ps *ProductService) Deserialize(data map[string]string, devService Develop
 	if validate {
 		var product Models.Product
 
-		product.Id = int64(Id)
 		product.Name = name
 		product.Cost = int8(Cost)
 		product.Count = int8(Count)

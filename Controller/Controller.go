@@ -3,40 +3,42 @@ package Controller
 import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/Service"
-	"app/REST_API_example/database"
 	"app/REST_API_example/utils"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
 type Controller struct {
 	service Service.Service
+	Router  *mux.Router
 }
 
-func NewController() {
-	user := os.Getenv("POSTGRES_USER")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	databaseName := os.Getenv("POSTGRES_DB")
-
-	dbp, err := database.New(user, password, databaseName)
-	if err != nil {
-		panic(err)
-	}
+func NewController() Controller {
 	var controller Controller
+	r := mux.NewRouter()
+	controller.service = Service.NewService()
 
-	controller.service = Service.NewService(dbp)
+	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.Create).Methods(http.MethodPost)
+	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.ReadAll).Methods("GET")
+	r.HandleFunc("/api/{table:[A-Za-z]+}/", controller.DeleteAll).Methods("DELETE")
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.ReadById).Methods("GET")
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.Update).Methods("PUT")
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.DeleteById).Methods("DELETE")
 
+	controller.Router = r
+
+	return controller
 }
 
-func (c Controller) create(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
 		pathVars := mux.Vars(r)
 		table, isSet := pathVars["table"]
-
 		if !isSet || table == "" {
+			log.Println("maybe this?")
 			http.Error(w, "wrong path", http.StatusBadRequest)
 			return
 		}
@@ -72,6 +74,7 @@ func (c Controller) create(w http.ResponseWriter, r *http.Request) {
 
 			err, user = c.service.UserService.Deserialize(data)
 
+			log.Println(user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
@@ -117,7 +120,7 @@ func (c Controller) create(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c Controller) readAll(w http.ResponseWriter, r *http.Request) {
+func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 	pathVars := mux.Vars(r)
 	var err error
 	var data interface{}
@@ -131,10 +134,11 @@ func (c Controller) readAll(w http.ResponseWriter, r *http.Request) {
 	case "users":
 		data, err = c.service.UserService.ReadAll()
 	}
+
 	utils.RespondJSON(w, data, err)
 }
 
-func (c Controller) readById(w http.ResponseWriter, r *http.Request) {
+func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
 	pathVars := mux.Vars(r)
 	var data interface{}
 	id, err := strconv.Atoi(pathVars["id"])
@@ -152,10 +156,11 @@ func (c Controller) readById(w http.ResponseWriter, r *http.Request) {
 	case "users":
 		data, err = c.service.UserService.ReadOne(int64(id))
 	}
+
 	utils.RespondJSON(w, data, err)
 }
 
-func (c Controller) update(w http.ResponseWriter, r *http.Request) {
+func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPut {
 		pathVars := mux.Vars(r)
 		table, isSetTable := pathVars["table"]
@@ -255,7 +260,7 @@ func (c Controller) update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c Controller) deleteAll(w http.ResponseWriter, r *http.Request) {
+func (c Controller) DeleteAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
 		pathVars := mux.Vars(r)
 		var err error
@@ -273,7 +278,7 @@ func (c Controller) deleteAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c Controller) deleteById(w http.ResponseWriter, r *http.Request) {
+func (c Controller) DeleteById(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
 		pathVars := mux.Vars(r)
 		id, err := strconv.Atoi(pathVars["id"])

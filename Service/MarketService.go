@@ -79,13 +79,6 @@ func (ms MarketService) DeleteAll() error {
 
 func (ms MarketService) Deserialize(data map[string]string) (Models.Market, error) {
 	var validate bool
-	id, isSet := data["id"]
-	validate = validate && isSet
-
-	Id, err := strconv.Atoi(id)
-	if err != nil {
-		return Models.Market{}, err
-	}
 
 	Name, isSet := data["name"]
 	validate = validate && isSet
@@ -102,8 +95,6 @@ func (ms MarketService) Deserialize(data map[string]string) (Models.Market, erro
 		var market Models.Market
 		market.Name = Name
 		market.MaxProducts = int64(Max)
-
-		market.Id = int64(Id)
 
 		return market, nil
 	} else {

@@ -1,6 +1,9 @@
 package Service
 
-import "app/REST_API_example/database"
+import (
+	"app/REST_API_example/database"
+	"os"
+)
 
 type Service struct {
 	DeveloperService *DeveloperService
@@ -9,7 +12,28 @@ type Service struct {
 	MarketService    *MarketService
 }
 
-func NewService(dbp *database.Database) Service {
+func NewService() Service {
+
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
+	connection := "db"
+	print("test: ", user, " ", password, " ", databaseName)
+	if user == "" || password == "" || databaseName == "" {
+		user = "postgres"
+		password = "postgres"
+		databaseName = "postgres"
+	}
+
+	dbp, err := database.New(user, password, connection, databaseName)
+	if err != nil {
+		connection = "localhost"
+		dbp, err = database.New(user, password, connection, databaseName)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	var service Service
 	service.ProductService = NewProductService(dbp)
 	service.DeveloperService = NewDeveloperService(dbp)

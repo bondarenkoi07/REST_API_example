@@ -7,7 +7,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./tables.sql:/docker-entrypoint-initdb.d/1-tables.sql
   web:
     build:
       context: .

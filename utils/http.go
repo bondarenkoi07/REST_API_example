@@ -2,23 +2,26 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
 func RespondJSON(w http.ResponseWriter, data interface{}, err error) {
-	encoder := json.NewEncoder(w)
-	encoder.SetEscapeHTML(true)
-
 	if data != nil && err == nil {
-		w.Header().Add("Content-Type", "application/json")
-		err = encoder.Encode(data)
+		w.Header().Set("Content-Type", "application/json")
+
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			log.Println("che? ", err)
+		}
+
+		_, err = w.Write(jsonData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusOK)
 	} else {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }
 
