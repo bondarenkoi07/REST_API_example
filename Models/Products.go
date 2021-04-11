@@ -1,6 +1,6 @@
 package Models
 
-type ProductModel struct {
+type Product struct {
 	Id        int64      `json:"id"`
 	Name      string     `json:"name"`
 	Cost      int8       `json:"cost"`
@@ -9,7 +9,7 @@ type ProductModel struct {
 	Market    *Market    `json:"market"`
 }
 
-func (p *ProductModel) GetFields() (string, []interface{}) {
+func (p Product) GetFields() (string, []interface{}) {
 	var ModelValues []interface{}
 
 	dbCols := "name,cost,count,developerId,marketId"

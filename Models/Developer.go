@@ -3,10 +3,10 @@ package Models
 type Developer struct {
 	OrgName string `json:"org_name"`
 	Section string `json:"section"`
-	UserId  *User  `json:"user"`
+	UserId  *User  `json:"id"`
 }
 
-func (d *Developer) GetFields() (string, []interface{}) {
+func (d Developer) GetFields() (string, []interface{}) {
 	var ModelValues []interface{}
 	dbCols := "id,org_name,section"
 	id := d.UserId.Id

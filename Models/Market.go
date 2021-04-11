@@ -6,7 +6,7 @@ type Market struct {
 	MaxProducts int64  `json:"max_products"`
 }
 
-func (m *Market) GetFields() (string, []interface{}) {
+func (m Market) GetFields() (string, []interface{}) {
 	var ModelValues []interface{}
 	dbCols := "name,max_products"
 

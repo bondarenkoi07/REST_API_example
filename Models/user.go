@@ -6,7 +6,7 @@ type User struct {
 	Password string `json:"password"`
 }
 
-func (u *User) GetFields() (string, []interface{}) {
+func (u User) GetFields() (string, []interface{}) {
 	var ModelValues []interface{}
 	dbCols := "login,password"
 

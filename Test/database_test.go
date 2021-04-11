@@ -83,7 +83,11 @@ func TestCRDUser(t *testing.T) {
 }
 
 func TestDeveloperOneToOne(t *testing.T) {
-	dbp, err := database.New("test", "Ee010800", "test")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
+
+	dbp, err := database.New(user, password, databaseName)
 
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
@@ -128,8 +132,11 @@ func TestDeveloperOneToOne(t *testing.T) {
 }
 
 func TestUpdateModel(t *testing.T) {
-	dbp, err := database.New("test", "Ee010800", "test")
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
 
+	dbp, err := database.New(user, password, databaseName)
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
 	}

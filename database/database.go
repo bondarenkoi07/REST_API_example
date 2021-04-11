@@ -26,7 +26,7 @@ func New(user, password, databaseName string) (*Database, error) {
 
 	ctx = context.Background()
 
-	dsn := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", user, password, databaseName)
+	dsn := fmt.Sprintf("postgres://%s:%s@db:5432/%s", user, password, databaseName)
 	var err error
 	pool, err = pgxpool.Connect(ctx, dsn)
 

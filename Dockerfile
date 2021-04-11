@@ -1,12 +1,8 @@
 FROM golang:1.15.7-buster
 
-RUN go get  github.com/bondarenkoi07/REST_API_example
 
-WORKDIR /go/src/github.com/bondarenkoi07/REST_API_example
+WORKDIR /app
 
-
-RUN go mod download && \
-    go mod vendor && \
-    go mod verify
+COPY . /app
 
 CMD ["/bin/bash"]
