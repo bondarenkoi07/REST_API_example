@@ -78,7 +78,7 @@ func (ms MarketService) DeleteAll() error {
 }
 
 func (ms MarketService) Deserialize(data map[string]string) (Models.Market, error) {
-	var validate bool
+	var validate = true
 
 	Name, isSet := data["name"]
 	validate = validate && isSet

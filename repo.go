@@ -1,13 +1,22 @@
-package REST_API_example
+package main
 
-import "app/REST_API_example/Service"
+import (
+	"app/REST_API_example/Controller"
+	"log"
+	"net/http"
+	"time"
+)
 
-func test(service Service.UserService) {
-	print(service.ReadAll())
-}
+func main() {
+	controller := Controller.NewController()
 
-func init() {
-	var service Service.UserService
+	srv := &http.Server{
+		Handler: controller.Router,
+		Addr:    "127.0.0.1:8000",
+		// Good practice: enforce timeouts for servers you create!
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
 
-	test(service)
+	log.Fatal(srv.ListenAndServe())
 }

@@ -4,6 +4,7 @@ import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/database"
 	"errors"
+	"log"
 	"strconv"
 )
 
@@ -16,12 +17,12 @@ func NewProductService(dbp *database.Database) *ProductService {
 }
 
 func (ps ProductService) Create(model Models.Product) error {
-	err := ps.dbp.Create("products", model)
+	err := ps.dbp.Create("product", model)
 	return err
 }
 
 func (ps ProductService) ReadOne(id int64) (*Models.Product, error) {
-	row, err := ps.dbp.ReadOne("products", id)
+	row, err := ps.dbp.ReadOne("product", id)
 
 	if err != nil {
 		return nil, err
@@ -29,17 +30,36 @@ func (ps ProductService) ReadOne(id int64) (*Models.Product, error) {
 		return nil, nil
 	}
 
+	var DeveloperId int64
+	var MarketId int64
+
 	var model Models.Product
-	err = (*row).Scan(&model.Name, &model.Cost, &model.Count, &model.Developer.UserId.Id, &model.Market.Id)
+	err = (*row).Scan(&model.Id, &model.Name, &model.Cost, &model.Count, &DeveloperId, &MarketId)
+
 	if err != nil {
 		return nil, err
-	} else {
-		return &model, nil
 	}
+
+	developerService := NewDeveloperService(ps.dbp)
+
+	marketService := NewMarketService(ps.dbp)
+
+	developer, err := developerService.ReadOne(DeveloperId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	market, err := marketService.ReadOne(MarketId)
+
+	model.Developer = developer
+	model.Market = market
+
+	return &model, nil
 }
 
 func (ps ProductService) ReadAll() ([]Models.Product, error) {
-	rows, err := ps.dbp.ReadAll("products")
+	rows, err := ps.dbp.ReadAll("product")
 
 	if err != nil {
 		return nil, err
@@ -53,32 +73,51 @@ func (ps ProductService) ReadAll() ([]Models.Product, error) {
 
 	for (*rows).Next() {
 		var iterModel Models.Product
-		err = (*rows).Scan(&iterModel.Name, &iterModel.Cost, &iterModel.Count, &iterModel.Developer.UserId.Id, &iterModel.Market.Id)
+		var DeveloperId int64
+		var MarketId int64
+		err = (*rows).Scan(&iterModel.Id, &iterModel.Name, &iterModel.Cost, &iterModel.Count, &DeveloperId, &MarketId)
 		if err != nil {
 			return nil, err
-		} else {
-			models = append(models, iterModel)
 		}
+
+		developerService := NewDeveloperService(ps.dbp)
+
+		marketService := NewMarketService(ps.dbp)
+
+		developer, err := developerService.ReadOne(DeveloperId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		market, err := marketService.ReadOne(MarketId)
+
+		iterModel.Developer = developer
+		iterModel.Market = market
+
+		models = append(models, iterModel)
 	}
 	return models, nil
 }
 
 func (ps ProductService) Update(model Models.Product, id int64) error {
-	err := ps.dbp.Update("products", id, model)
+	err := ps.dbp.Update("product", id, model)
 	return err
 }
 
 func (ps ProductService) DeleteOne(id int64) error {
-	err := ps.dbp.DeleteOne("products", id)
+	err := ps.dbp.DeleteOne("product", id)
 	return err
 }
 
 func (ps ProductService) DeleteAll() error {
-	return ps.dbp.DeleteAll("products")
+	return ps.dbp.DeleteAll("product")
 }
 
 func (ps *ProductService) Deserialize(data map[string]string, devService DeveloperService, marketService MarketService) (error, Models.Product) {
-	var validate bool
+	var validate = true
+
+	log.Println(data)
 
 	name, isSet := data["name"]
 	validate = validate && isSet

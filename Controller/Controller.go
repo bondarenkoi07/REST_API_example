@@ -22,11 +22,11 @@ func NewController() Controller {
 	controller.service = Service.NewService()
 
 	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.Create).Methods(http.MethodPost)
-	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.ReadAll).Methods("GET")
-	r.HandleFunc("/api/{table:[A-Za-z]+}/", controller.DeleteAll).Methods("DELETE")
-	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.ReadById).Methods("GET")
-	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.Update).Methods("PUT")
-	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.DeleteById).Methods("DELETE")
+	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.ReadAll).Methods(http.MethodGet)
+	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.DeleteAll).Methods(http.MethodDelete)
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.ReadById).Methods(http.MethodGet)
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.Update).Methods(http.MethodPut)
+	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.DeleteById).Methods(http.MethodDelete)
 
 	controller.Router = r
 
@@ -44,7 +44,7 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 		}
 		var err error
 		switch table {
-		case "products":
+		case "product":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
 			if err != nil {
@@ -127,7 +127,7 @@ func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 	switch pathVars["table"] {
 	case "markets":
 		data, err = c.service.MarketService.ReadAll()
-	case "products":
+	case "product":
 		data, err = c.service.ProductService.ReadAll()
 	case "developers":
 		data, err = c.service.DeveloperService.ReadAll()
@@ -149,7 +149,7 @@ func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
 	switch pathVars["table"] {
 	case "markets":
 		data, err = c.service.MarketService.ReadOne(int64(id))
-	case "products":
+	case "product":
 		data, err = c.service.ProductService.ReadOne(int64(id))
 	case "developers":
 		data, err = c.service.DeveloperService.ReadOne(int64(id))
@@ -215,7 +215,7 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 			}
 
 			err = c.service.DeveloperService.Update(user, int64(Id))
-		case "products":
+		case "product":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
 			if err != nil {
@@ -267,7 +267,7 @@ func (c Controller) DeleteAll(w http.ResponseWriter, r *http.Request) {
 		switch pathVars["table"] {
 		case "markets":
 			err = c.service.MarketService.DeleteAll()
-		case "products":
+		case "product":
 			err = c.service.ProductService.DeleteAll()
 		case "developers":
 			err = c.service.DeveloperService.DeleteAll()
@@ -289,7 +289,7 @@ func (c Controller) DeleteById(w http.ResponseWriter, r *http.Request) {
 		switch pathVars["table"] {
 		case "markets":
 			err = c.service.MarketService.DeleteOne(int64(id))
-		case "products":
+		case "product":
 			err = c.service.ProductService.DeleteOne(int64(id))
 		case "developers":
 			err = c.service.DeveloperService.DeleteOne(int64(id))

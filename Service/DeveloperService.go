@@ -30,12 +30,22 @@ func (ds DeveloperService) ReadOne(id int64) (*Models.Developer, error) {
 	}
 
 	var model Models.Developer
-	err = (*row).Scan(&model.UserId.Id, &model.OrgName, &model.Section)
+	err = (*row).Scan(&id, &model.OrgName, &model.Section)
+
 	if err != nil {
 		return nil, err
-	} else {
-		return &model, nil
 	}
+
+	userService := NewUserService(ds.dbp)
+
+	user, err := userService.ReadOne(id)
+	if err != nil {
+		return nil, err
+	}
+
+	model.UserId = user
+
+	return &model, nil
 }
 
 func (ds DeveloperService) ReadAll() ([]Models.Developer, error) {
@@ -53,12 +63,22 @@ func (ds DeveloperService) ReadAll() ([]Models.Developer, error) {
 
 	for (*rows).Next() {
 		var iterModel Models.Developer
-		err = (*rows).Scan(&iterModel.UserId.Id, &iterModel.OrgName, &iterModel.Section)
+		var id int64
+		err = (*rows).Scan(&id, &iterModel.OrgName, &iterModel.Section)
 		if err != nil {
 			return nil, err
-		} else {
-			models = append(models, iterModel)
 		}
+
+		userService := NewUserService(ds.dbp)
+
+		user, err := userService.ReadOne(id)
+		if err != nil {
+			return nil, err
+		}
+
+		iterModel.UserId = user
+
+		models = append(models, iterModel)
 	}
 	return models, nil
 }
@@ -78,7 +98,7 @@ func (ds DeveloperService) DeleteAll() error {
 }
 
 func (ds *DeveloperService) Deserialize(data map[string]string, Service UserService) (error, Models.Developer) {
-	var validate bool
+	var validate = true
 	id, isSet := data["id"]
 	validate = validate && isSet
 
