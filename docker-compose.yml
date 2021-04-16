@@ -13,10 +13,12 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
-    command: go test  ./...
+    command: go run app/REST_API_example
     volumes:
       - .:/go/src/github.com/bondarenkoi07/REST_API_example
     ports:
       - "8000:8000"
+    networks:
+      - default
     depends_on:
       - db

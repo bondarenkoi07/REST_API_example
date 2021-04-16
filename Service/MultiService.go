@@ -18,7 +18,6 @@ func NewService() Service {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	databaseName := os.Getenv("POSTGRES_DB")
 	connection := "db"
-	print("test: ", user, " ", password, " ", databaseName)
 	if user == "" || password == "" || databaseName == "" {
 		user = "postgres"
 		password = "postgres"

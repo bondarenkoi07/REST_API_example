@@ -3,6 +3,7 @@ package Test
 import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/database"
+	"fmt"
 	"os"
 	"testing"
 
@@ -213,5 +214,108 @@ func TestUpdateModel(t *testing.T) {
 		} else if !(ValidateModel.Login == TestUserModel.Login && ValidateModel.Password == TestUserModel.Password) {
 			t.Error("Test and Validation models are not equal")
 		}
+	}
+}
+
+func TestManyToOne(t *testing.T) {
+	user := os.Getenv("POSTGRES_USER")
+	password := os.Getenv("POSTGRES_PASSWORD")
+	databaseName := os.Getenv("POSTGRES_DB")
+
+	if user == "" || password == "" || databaseName == "" {
+		user = "postgres"
+		password = "postgres"
+		databaseName = "postgres"
+	}
+
+	dbp, err := database.New(user, password, "localhost", databaseName)
+
+	if err != nil {
+		t.Error("Could not create database connection: ", err)
+	}
+
+	var TestUserModel = &Models.User{Login: "foo", Password: "bar"}
+
+	err = dbp.Create("users", TestUserModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+
+	var rows *pgx.Rows
+
+	rows, err = dbp.ReadAll("users")
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	defer (*rows).Close()
+
+	for (*rows).Next() {
+		err = (*rows).Scan(&TestUserModel.Id, &TestUserModel.Login, &TestUserModel.Password)
+		if err != nil {
+			t.Error("Cannot serialize row: ", TestUserModel)
+		}
+	}
+
+	var TestDeveloperModel = &Models.Developer{OrgName: "roga", Section: "KoPbITA", UserId: TestUserModel}
+
+	err = dbp.Create("developers", TestDeveloperModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+
+	var TestMarketModel = &Models.Market{Name: "roga", MaxProducts: 5}
+
+	err = dbp.Create("markets", TestMarketModel)
+
+	if err != nil {
+		t.Error("Could not insert model: ", err)
+	}
+
+	rows, err = dbp.ReadAll("markets")
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	defer (*rows).Close()
+
+	for (*rows).Next() {
+		err = (*rows).Scan(&TestMarketModel.Id, &TestMarketModel.Name, &TestMarketModel.MaxProducts)
+		if err != nil {
+			t.Error("Cannot serialize row: ", TestUserModel)
+		}
+	}
+
+	for i := 0; i < 5; i++ {
+		var TestProductModel = &Models.Product{Name: fmt.Sprintf("name%d", i), Cost: int8(i * 10), Count: int8(i * 5), Developer: TestDeveloperModel, Market: TestMarketModel}
+
+		err = dbp.Create("product", TestProductModel)
+	}
+
+	row, err := dbp.GetProductsCount(TestMarketModel.Id)
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	id := 0
+	cnt := 0
+	err = (*row).Scan(&id, &cnt)
+	if err != nil {
+		t.Error("Cannot serialize row: ", TestUserModel)
+	}
+
+	if cnt != 5 {
+		t.Error("Counted not properly enough", TestUserModel)
 	}
 }

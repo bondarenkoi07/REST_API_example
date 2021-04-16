@@ -4,6 +4,7 @@ import (
 	"app/REST_API_example/Models"
 	"app/REST_API_example/database"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -17,7 +18,18 @@ func NewProductService(dbp *database.Database) *ProductService {
 }
 
 func (ps ProductService) Create(model Models.Product) error {
-	err := ps.dbp.Create("product", model)
+	MarketCapacity := model.Market.MaxProducts
+	count, err := ps.getProductsCount(model.Market.Id)
+	if count == -1 {
+		return err
+	}
+	log.Println("capacity: ", MarketCapacity, "count: ", count)
+	if MarketCapacity >= count+int64(model.Count) {
+		err = ps.dbp.Create("product", model)
+	} else {
+		err = errors.New("market's storage is full")
+	}
+
 	return err
 }
 
@@ -101,7 +113,14 @@ func (ps ProductService) ReadAll() ([]Models.Product, error) {
 }
 
 func (ps ProductService) Update(model Models.Product, id int64) error {
-	err := ps.dbp.Update("product", id, model)
+	MarketCapacity := model.Market.MaxProducts
+	count, err := ps.getProductsCount(model.Market.Id)
+	if MarketCapacity > count+int64(model.Count) {
+		err = ps.dbp.Update("product", id, model)
+	} else {
+		err = errors.New(fmt.Sprintf(" storage is full in %s market", model.Market.Name))
+	}
+
 	return err
 }
 
@@ -112,6 +131,28 @@ func (ps ProductService) DeleteOne(id int64) error {
 
 func (ps ProductService) DeleteAll() error {
 	return ps.dbp.DeleteAll("product")
+}
+
+func (ps ProductService) getProductsCount(id int64) (int64, error) {
+	row, err := ps.dbp.GetProductsCount(id)
+	if err != nil {
+		return -1, err
+	}
+
+	var (
+		Id    int64
+		count int64
+	)
+
+	err = (*row).Scan(&Id, &count)
+
+	if err != nil {
+		return -1, err
+	} else if Id != id {
+		return -1, errors.New("could not find current market")
+	} else {
+		return count, nil
+	}
 }
 
 func (ps *ProductService) Deserialize(data map[string]string, devService DeveloperService, marketService MarketService) (error, Models.Product) {

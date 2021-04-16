@@ -135,7 +135,7 @@ func TestDeleteHandler(t *testing.T) {
 		t.Error(rr.Code, rr.Body)
 	}
 
-	req, err = http.NewRequest(http.MethodDelete, "/api/users/", nil)
+	req, err = http.NewRequest(http.MethodDelete, "/api/users", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +147,7 @@ func TestDeleteHandler(t *testing.T) {
 	err = json.NewDecoder(rr.Body).Decode(&test)
 
 	if rr.Code != http.StatusOK || test["status"] != "deleted" {
-		t.Error(rr.Code, rr.Body.String())
+		t.Error(rr.Code, test["status"])
 	}
 
 	req, err = http.NewRequest(http.MethodDelete, "/api/users/1", nil)
