@@ -15,6 +15,11 @@ func NewMarketService(dbp *database.Database) *MarketService {
 	return &MarketService{dbp: dbp}
 }
 
+func (ms MarketService) Save(model Models.Market) (int64, error) {
+	id, err := ms.dbp.Save("markets", model)
+	return id, err
+}
+
 func (ms MarketService) Create(model Models.Market) error {
 	err := ms.dbp.Create("markets", model)
 	return err

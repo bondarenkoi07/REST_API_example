@@ -5,6 +5,7 @@ import (
 	"app/REST_API_example/database"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v4"
 	"log"
 	"strconv"
 )
@@ -20,11 +21,17 @@ func NewProductService(dbp *database.Database) *ProductService {
 func (ps ProductService) Create(model Models.Product) error {
 	MarketCapacity := model.Market.MaxProducts
 	count, err := ps.getProductsCount(model.Market.Id)
-	if count == -1 {
-		return err
+	if count == -1 && err != nil {
+		if !(err.Error() == "no rows in result set") {
+			return err
+		}
+
+	} else if err == nil && count == -1 {
+		return errors.New("err occurred while getting products marketId")
 	}
-	log.Println("capacity: ", MarketCapacity, "count: ", count)
+
 	if MarketCapacity >= count+int64(model.Count) {
+
 		err = ps.dbp.Create("product", model)
 	} else {
 		err = errors.New("market's storage is full")
@@ -78,38 +85,8 @@ func (ps ProductService) ReadAll() ([]Models.Product, error) {
 	} else if rows == nil {
 		return nil, nil
 	}
-
-	defer (*rows).Close()
-
-	models := make([]Models.Product, 0)
-
-	for (*rows).Next() {
-		var iterModel Models.Product
-		var DeveloperId int64
-		var MarketId int64
-		err = (*rows).Scan(&iterModel.Id, &iterModel.Name, &iterModel.Cost, &iterModel.Count, &DeveloperId, &MarketId)
-		if err != nil {
-			return nil, err
-		}
-
-		developerService := NewDeveloperService(ps.dbp)
-
-		marketService := NewMarketService(ps.dbp)
-
-		developer, err := developerService.ReadOne(DeveloperId)
-
-		if err != nil {
-			return nil, err
-		}
-
-		market, err := marketService.ReadOne(MarketId)
-
-		iterModel.Developer = developer
-		iterModel.Market = market
-
-		models = append(models, iterModel)
-	}
-	return models, nil
+	log.Println((*rows).RawValues(), (*rows).Err())
+	return ps.fetchProducts(rows)
 }
 
 func (ps ProductService) Update(model Models.Product, id int64) error {
@@ -146,6 +123,8 @@ func (ps ProductService) getProductsCount(id int64) (int64, error) {
 
 	err = (*row).Scan(&Id, &count)
 
+	log.Println("So... ", count, err)
+
 	if err != nil {
 		return -1, err
 	} else if Id != id {
@@ -157,8 +136,6 @@ func (ps ProductService) getProductsCount(id int64) (int64, error) {
 
 func (ps *ProductService) Deserialize(data map[string]string, devService DeveloperService, marketService MarketService) (error, Models.Product) {
 	var validate = true
-
-	log.Println(data)
 
 	name, isSet := data["name"]
 	validate = validate && isSet
@@ -216,4 +193,50 @@ func (ps *ProductService) Deserialize(data map[string]string, devService Develop
 	} else {
 		return errors.New("wrong JSON"), Models.Product{}
 	}
+}
+
+func (ps ProductService) FilterProductsByMarket(id int64) ([]Models.Product, error) {
+	rows, err := ps.dbp.GetMarketProducts(id)
+	if err != nil {
+		return nil, err
+	} else if rows == nil {
+		return nil, nil
+	}
+
+	return ps.fetchProducts(rows)
+}
+
+func (ps ProductService) fetchProducts(rows *pgx.Rows) ([]Models.Product, error) {
+
+	defer (*rows).Close()
+
+	models := make([]Models.Product, 0)
+
+	for (*rows).Next() {
+		var iterModel Models.Product
+		var DeveloperId int64
+		var MarketId int64
+		err := (*rows).Scan(&iterModel.Id, &iterModel.Name, &iterModel.Cost, &iterModel.Count, &DeveloperId, &MarketId)
+		if err != nil {
+			return nil, err
+		}
+
+		developerService := NewDeveloperService(ps.dbp)
+
+		marketService := NewMarketService(ps.dbp)
+
+		developer, err := developerService.ReadOne(DeveloperId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		market, err := marketService.ReadOne(MarketId)
+
+		iterModel.Developer = developer
+		iterModel.Market = market
+
+		models = append(models, iterModel)
+	}
+	return models, nil
 }

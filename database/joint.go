@@ -19,3 +19,17 @@ func (d *Database) GetProductsCount(id int64) (*pgx.Row, error) {
 
 	return &rows, nil
 }
+
+func (d *Database) GetMarketProducts(id int64) (*pgx.Rows, error) {
+	SQLStatement := `SELECT * FROM product  WHERE marketId = $1 order by marketId`
+	conn, err := (*d).pool.Acquire(d.ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+	rows, err := conn.Query(d.ctx, SQLStatement, id)
+	if err != nil {
+		return nil, err
+	}
+	return &rows, nil
+}

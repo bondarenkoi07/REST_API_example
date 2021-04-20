@@ -27,6 +27,7 @@ func NewController() Controller {
 	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.ReadById).Methods(http.MethodGet)
 	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.Update).Methods(http.MethodPut)
 	r.HandleFunc("/api/{table:[A-Za-z]+}/{id:[0-9]+}", controller.DeleteById).Methods(http.MethodDelete)
+	r.HandleFunc("/api/{table:[A-Za-z]+}/filter/{f_key:[A-Za-z]+}/{id:[0-9]+}", controller.FilterProducts).Methods(http.MethodGet)
 
 	controller.Router = r
 
@@ -114,6 +115,8 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			err = c.service.MarketService.Create(user)
+		default:
+			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 
 		utils.RespondJSON(w, map[string]string{"status": "created"}, err)
@@ -133,6 +136,8 @@ func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 		data, err = c.service.DeveloperService.ReadAll()
 	case "users":
 		data, err = c.service.UserService.ReadAll()
+	default:
+		http.Error(w, "table does not exist", http.StatusBadRequest)
 	}
 
 	utils.RespondJSON(w, data, err)
@@ -155,6 +160,8 @@ func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
 		data, err = c.service.DeveloperService.ReadOne(int64(id))
 	case "users":
 		data, err = c.service.UserService.ReadOne(int64(id))
+	default:
+		http.Error(w, "table does not exist", http.StatusBadRequest)
 	}
 
 	utils.RespondJSON(w, data, err)
@@ -251,6 +258,9 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 			}
 
 			err = c.service.MarketService.Update(user, int64(Id))
+
+		default:
+			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -273,6 +283,8 @@ func (c Controller) DeleteAll(w http.ResponseWriter, r *http.Request) {
 			err = c.service.DeveloperService.DeleteAll()
 		case "users":
 			err = c.service.UserService.DeleteAll()
+		default:
+			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 		utils.RespondJSON(w, map[string]string{"status": "deleted"}, err)
 	}
@@ -295,7 +307,36 @@ func (c Controller) DeleteById(w http.ResponseWriter, r *http.Request) {
 			err = c.service.DeveloperService.DeleteOne(int64(id))
 		case "users":
 			err = c.service.UserService.DeleteOne(int64(id))
+		default:
+			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 		utils.RespondJSON(w, map[string]string{"status": "deleted"}, err)
+	}
+}
+
+func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		pathVars := mux.Vars(r)
+		id, err := strconv.Atoi(pathVars["id"])
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		var data interface{}
+		switch pathVars["table"] {
+		case "product":
+			switch pathVars["f_key"] {
+			case "markets":
+				data, err = c.service.ProductService.FilterProductsByMarket(int64(id))
+			default:
+				http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
+			}
+		default:
+			http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
+		}
+
+		log.Println(data)
+
+		utils.RespondJSON(w, data, err)
 	}
 }

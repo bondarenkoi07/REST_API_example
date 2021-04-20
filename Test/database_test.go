@@ -26,6 +26,17 @@ func TestCRDUser(t *testing.T) {
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
 	}
+	err = dbp.DeleteAll("users")
+
+	if err != nil {
+		t.Error("couldn't vanish users: ", err)
+	}
+
+	err = dbp.DeleteAll("markets")
+
+	if err != nil {
+		t.Error("couldn't vanish markets: ", err)
+	}
 
 	var TestModel = &Models.User{Login: "foo", Password: "bar"}
 
@@ -156,7 +167,6 @@ func TestUpdateModel(t *testing.T) {
 	}
 
 	dbp, err := database.New(user, password, "localhost", databaseName)
-
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
 	}
@@ -222,7 +232,7 @@ func TestManyToOne(t *testing.T) {
 	password := os.Getenv("POSTGRES_PASSWORD")
 	databaseName := os.Getenv("POSTGRES_DB")
 
-	if user == "" || password == "" || databaseName == "" {
+	if user == "" || password == "" || databaseName == "" || user == "foo" {
 		user = "postgres"
 		password = "postgres"
 		databaseName = "postgres"
@@ -233,6 +243,21 @@ func TestManyToOne(t *testing.T) {
 	if err != nil {
 		t.Error("Could not create database connection: ", err)
 	}
+
+	err = dbp.DeleteAll("users")
+
+	if err != nil {
+		t.Error("couldn't vanish users: ", err)
+	}
+
+	err = dbp.DeleteAll("markets")
+
+	if err != nil {
+		t.Error("couldn't vanish markets: ", err)
+	}
+
+	defer dbp.DeleteAll("users")
+	defer dbp.DeleteAll("markets")
 
 	var TestUserModel = &Models.User{Login: "foo", Password: "bar"}
 
@@ -295,7 +320,7 @@ func TestManyToOne(t *testing.T) {
 	}
 
 	for i := 0; i < 5; i++ {
-		var TestProductModel = &Models.Product{Name: fmt.Sprintf("name%d", i), Cost: int8(i * 10), Count: int8(i * 5), Developer: TestDeveloperModel, Market: TestMarketModel}
+		var TestProductModel = &Models.Product{Name: fmt.Sprintf("name%d", i), Cost: int8(i * 10), Count: int8(1), Developer: TestDeveloperModel, Market: TestMarketModel}
 
 		err = dbp.Create("product", TestProductModel)
 	}
@@ -312,10 +337,32 @@ func TestManyToOne(t *testing.T) {
 	cnt := 0
 	err = (*row).Scan(&id, &cnt)
 	if err != nil {
-		t.Error("Cannot serialize row: ", TestUserModel)
+		t.Error("Cannot serialize row: ", TestUserModel, err)
 	}
 
 	if cnt != 5 {
 		t.Error("Counted not properly enough", TestUserModel)
+	}
+
+	var list = make([]interface{}, 0)
+
+	rows, err = dbp.GetMarketProducts(TestMarketModel.Id)
+
+	if err != nil {
+		t.Error("Could not read rows: ", err)
+	} else if rows == nil {
+		t.Error("nil pointer: ")
+	}
+
+	for (*rows).Next() {
+		data, err := (*rows).Values()
+		if err != nil {
+			t.Error(err)
+		}
+		list = append(list, data)
+	}
+
+	if len(list) != 5 {
+		t.Error("query fetched rows not properly")
 	}
 }

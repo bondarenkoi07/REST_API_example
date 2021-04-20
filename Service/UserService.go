@@ -21,6 +21,11 @@ func (us UserService) Create(model Models.User) error {
 	return err
 }
 
+func (us UserService) Save(model Models.User) (int64, error) {
+	id, err := us.dbp.Save("users", model)
+	return id, err
+}
+
 func (us UserService) ReadOne(id int64) (*Models.User, error) {
 	row, err := us.dbp.ReadOne("users", id)
 
