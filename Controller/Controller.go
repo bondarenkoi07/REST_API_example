@@ -322,20 +322,31 @@ func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		Id := int64(id)
 		var data interface{}
 		switch pathVars["table"] {
 		case "product":
 			switch pathVars["f_key"] {
 			case "markets":
-				data, err = c.service.ProductService.FilterProductsByMarket(int64(id))
+				data, err = c.service.ProductService.FilterProductsByMarket(Id)
+			case "developers":
+				data, err = c.service.ProductService.FilterProductsByDeveloper(Id)
 			default:
 				http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
+				return
+			}
+		case "developers":
+			switch pathVars["f_key"] {
+			case "markets":
+				data, err = c.service.DeveloperService.FilterDevelopers(Id)
+			default:
+				http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
+				return
 			}
 		default:
 			http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
+			return
 		}
-
-		log.Println(data)
 
 		utils.RespondJSON(w, data, err)
 	}

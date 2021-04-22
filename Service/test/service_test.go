@@ -5,7 +5,6 @@ import (
 	_ "app/REST_API_example/Models"
 	"app/REST_API_example/Service"
 	"app/REST_API_example/database"
-	"log"
 	"os"
 	"testing"
 )
@@ -82,7 +81,7 @@ func TestGetMarketProducts(t *testing.T) {
 	user.Id = id
 
 	developer.UserId = &user
-	log.Printf("user id %d\n", id)
+
 	err = DeveloperService.Create(developer)
 
 	if err != nil {
@@ -96,7 +95,7 @@ func TestGetMarketProducts(t *testing.T) {
 	}
 
 	market1.Id = id
-	log.Printf("market1 id %d\n", id)
+
 	id, err = MarketService.Save(market2)
 
 	if err != nil {
@@ -104,7 +103,6 @@ func TestGetMarketProducts(t *testing.T) {
 	}
 
 	market2.Id = id
-	log.Printf("market2 id %d\n", id)
 
 	product1.Market = &market1
 	product1.Developer = &developer
@@ -112,7 +110,7 @@ func TestGetMarketProducts(t *testing.T) {
 	err = ProductService.Create(product1)
 
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Error(err)
 	}
 
 	product2.Market = &market2
@@ -132,6 +130,24 @@ func TestGetMarketProducts(t *testing.T) {
 		t.Errorf("Wrong number of products: should be 1, got %d", len(validateProducts))
 	} else {
 		if !(validateProducts[0].Count == product1.Count && validateProducts[0].Cost == product1.Cost && validateProducts[0].Name == product1.Name) {
+			t.Error("Wrong Model fetched")
+		}
+	}
+
+	validateProducts, err = ProductService.FilterProductsByDeveloper(developer.UserId.Id)
+
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	} else if len(validateProducts) != 2 {
+		t.Errorf("Wrong number of products: should be 2, got %d", len(validateProducts))
+	} else {
+		validation := validateProducts[0].Count == product1.Count
+		validation = validation && validateProducts[0].Cost == product1.Cost
+		validation = validation && validateProducts[0].Name == product1.Name
+		validation = validation && validateProducts[1].Cost == product2.Cost
+		validation = validation && validateProducts[1].Name == product2.Name
+		validation = validation && validateProducts[1].Count == product1.Count
+		if !(validation) {
 			t.Error("Wrong Model fetched")
 		}
 	}

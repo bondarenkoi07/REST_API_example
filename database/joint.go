@@ -20,6 +20,25 @@ func (d *Database) GetProductsCount(id int64) (*pgx.Row, error) {
 	return &rows, nil
 }
 
+func (d *Database) GetMarketDevelopers(id int64) (*pgx.Rows, error) {
+	SQLStatement := `SELECT DISTINCT developers.*, COUNT(product.id), SUM(product.count)
+						FROM product
+						inner join developers on developers.id = product.developerId
+						WHERE product.marketId = $1
+						GROUP BY developers.id
+	`
+	conn, err := (*d).pool.Acquire(d.ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+	rows, err := conn.Query(d.ctx, SQLStatement, id)
+	if err != nil {
+		return nil, err
+	}
+	return &rows, nil
+}
+
 func (d *Database) GetMarketProducts(id int64) (*pgx.Rows, error) {
 	SQLStatement := `SELECT * FROM product  WHERE marketId = $1 order by marketId`
 	conn, err := (*d).pool.Acquire(d.ctx)
@@ -28,6 +47,21 @@ func (d *Database) GetMarketProducts(id int64) (*pgx.Rows, error) {
 	}
 	defer conn.Release()
 	rows, err := conn.Query(d.ctx, SQLStatement, id)
+	if err != nil {
+		return nil, err
+	}
+	return &rows, nil
+}
+
+func (d *Database) GetDeveloperProducts(id int64) (*pgx.Rows, error) {
+	SQLStatement := `SELECT * from product where developerId = $1`
+	conn, err := (*d).pool.Acquire(d.ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+	rows, err := conn.Query(d.ctx, SQLStatement, id)
+
 	if err != nil {
 		return nil, err
 	}

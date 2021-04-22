@@ -7,6 +7,12 @@ import (
 	"strconv"
 )
 
+type DevInfo struct {
+	DevInfo Models.Developer
+	Count   int64
+	Sum     int64
+}
+
 type DeveloperService struct {
 	dbp *database.Database
 }
@@ -95,6 +101,40 @@ func (ds DeveloperService) DeleteOne(id int64) error {
 
 func (ds DeveloperService) DeleteAll() error {
 	return ds.dbp.DeleteAll("developers")
+}
+
+func (ds DeveloperService) FilterDevelopers(id int64) ([]DevInfo, error) {
+	rows, err := ds.dbp.GetMarketDevelopers(id)
+	if err != nil {
+		return nil, err
+	} else if rows == nil {
+		return nil, errors.New("there are any developers")
+	}
+
+	defer (*rows).Close()
+
+	models := make([]DevInfo, 0)
+
+	for (*rows).Next() {
+		var iterModel DevInfo
+		var id int64
+		err = (*rows).Scan(&id, &iterModel.DevInfo.OrgName, &iterModel.DevInfo.Section, &iterModel.Count, &iterModel.Sum)
+		if err != nil {
+			return nil, err
+		}
+
+		userService := NewUserService(ds.dbp)
+
+		user, err := userService.ReadOne(id)
+		if err != nil {
+			return nil, err
+		}
+
+		iterModel.DevInfo.UserId = user
+
+		models = append(models, iterModel)
+	}
+	return models, nil
 }
 
 func (ds *DeveloperService) Deserialize(data map[string]string, Service UserService) (error, Models.Developer) {

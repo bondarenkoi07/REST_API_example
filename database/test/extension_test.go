@@ -38,7 +38,8 @@ func init() {
 			panic(err)
 		}
 	}
-
+	dbp.DeleteAll("users")
+	dbp.DeleteAll("markets")
 }
 
 func TestSave(t *testing.T) {

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jackc/pgx/v4"
-	"log"
 	"strconv"
 )
 
@@ -85,7 +84,6 @@ func (ps ProductService) ReadAll() ([]Models.Product, error) {
 	} else if rows == nil {
 		return nil, nil
 	}
-	log.Println((*rows).RawValues(), (*rows).Err())
 	return ps.fetchProducts(rows)
 }
 
@@ -122,8 +120,6 @@ func (ps ProductService) getProductsCount(id int64) (int64, error) {
 	)
 
 	err = (*row).Scan(&Id, &count)
-
-	log.Println("So... ", count, err)
 
 	if err != nil {
 		return -1, err
@@ -197,6 +193,17 @@ func (ps *ProductService) Deserialize(data map[string]string, devService Develop
 
 func (ps ProductService) FilterProductsByMarket(id int64) ([]Models.Product, error) {
 	rows, err := ps.dbp.GetMarketProducts(id)
+	if err != nil {
+		return nil, err
+	} else if rows == nil {
+		return nil, nil
+	}
+
+	return ps.fetchProducts(rows)
+}
+
+func (ps ProductService) FilterProductsByDeveloper(id int64) ([]Models.Product, error) {
+	rows, err := ps.dbp.GetDeveloperProducts(id)
 	if err != nil {
 		return nil, err
 	} else if rows == nil {
