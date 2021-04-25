@@ -124,6 +124,10 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet{
+		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	pathVars := mux.Vars(r)
 	var err error
 	var data interface{}
@@ -144,6 +148,10 @@ func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet{
+		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	pathVars := mux.Vars(r)
 	var data interface{}
 	id, err := strconv.Atoi(pathVars["id"])
@@ -311,6 +319,9 @@ func (c Controller) DeleteById(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 		utils.RespondJSON(w, map[string]string{"status": "deleted"}, err)
+	}else {
+		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
@@ -349,5 +360,8 @@ func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		utils.RespondJSON(w, data, err)
+	}else {
+		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
+		return
 	}
 }
