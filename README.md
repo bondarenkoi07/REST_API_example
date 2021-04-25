@@ -4,6 +4,14 @@
 Server is made with Go package `net/http`. REST API was implemented using package `gorilla.mux`, which is able to create flexing routing.
 For the sake of interest I reject using `GORM` and decide to use specific POSTGRESQL-compatible package [`jackc/pgx`](https://github.com/jackc/pgx) to create queries manually.  
 
+---
+
+# Install
+Clone this repo and then run this command in terminal in project directory:
+```bash
+docker-compose -f docker-compose.yml up -d --build
+```
+
 ---  
 
 ## Schema
