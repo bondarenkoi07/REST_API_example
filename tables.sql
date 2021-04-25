@@ -1,6 +1,3 @@
-drop table users if exists;
-
-
 create table users(
     id serial not null,
     login varchar(256) not null unique,

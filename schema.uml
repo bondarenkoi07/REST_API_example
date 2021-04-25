@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DATABASE</ID>
+  <OriginalElement>472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.product</OriginalElement>
+  <nodes>
+    <node x="-322.2412868632707" y="249.2680965147453">472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.markets</node>
+    <node x="2.78954423592495" y="223.5656836461126">472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.product</node>
+    <node x="333.8203753351206" y="95.82305630026809">472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.users</node>
+    <node x="2.78954423592495" y="22.979892761394055">472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.developers</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.developers" target="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.users" relationship="REFERENCES">
+      <point x="0.0" y="-54.5" />
+      <point x="99.28954423592495" y="74.28418230562997" />
+      <point x="424.3203753351206" y="74.28418230562997" />
+      <point x="0.0" y="54.5" />
+    </edge>
+    <edge source="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.product" target="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.markets" relationship="REFERENCES">
+      <point x="-43.0" y="-90.0" />
+      <point x="45.78954423592495" y="293.0" />
+      <point x="-228.74128686327072" y="293.0" />
+      <point x="0.0" y="54.5" />
+    </edge>
+    <edge source="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.product" target="472c340a-3a2e-4a7b-a699-953f5811a26d.TABLE:postgres.public.developers" relationship="REFERENCES">
+      <point x="43.0" y="-90.0" />
+      <point x="131.78954423592495" y="281.89008042895443" />
+      <point x="99.28954423592495" y="281.89008042895443" />
+      <point x="0.0" y="54.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.7200772200772201" showDependencies="false" x="200.0" y="249.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Columns</Category>
+    <Category>Key columns</Category>
+    <Category>Virtual foreign keys</Category>
+  </Categories>
+</Diagram>
+
