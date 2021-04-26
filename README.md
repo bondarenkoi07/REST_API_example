@@ -1,6 +1,6 @@
 # REST_API_example
 
-  This app was made to demonstrate how golang interactive web application may be developed to сorresond *REST architecture*.
+  This app was made to demonstrate how golang interactive web application may be developed to сorrespond *REST architecture*.
 Server is made with Go package `net/http`. REST API was implemented using package `gorilla.mux`, which is able to create flexing routing.
 For the sake of interest I reject using `GORM` and decide to use specific POSTGRESQL-compatible package [`jackc/pgx`](https://github.com/jackc/pgx) to create queries manually.  
 
@@ -125,4 +125,4 @@ func NewController() Controller {
 
 ### package Utils
 
-This package consist small func responible for final request and response handling (encode/decode JSON, writing HTTP body, etc.)
+This package contains small func responible for final request and response handling (encode/decode JSON, writing HTTP body, etc.)
