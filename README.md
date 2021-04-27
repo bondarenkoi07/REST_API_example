@@ -129,4 +129,4 @@ This package contains small funcs working with HTTP Request/Response (encode/dec
 
 ## Tests
 
-Several testing were of app units using standart Go `testing` (search files in test/Test directories) and with [Postman](https://www.postman.com/) app. 
+Several testing of app units using standart Go `testing` (search files in test/Test directories) and with [Postman](https://www.postman.com/) app were carried out. 
