@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"app/REST_API_example/Controller"
@@ -10,7 +10,7 @@ import (
 func main() {
 	controller := Controller.NewController()
 
-	log.Print("Hello, World!")
+	log.Println("Controller activated")
 
 	srv := &http.Server{
 		Handler: controller.Router,
@@ -19,6 +19,6 @@ func main() {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-
+	log.Println("init server")
 	log.Fatal(srv.ListenAndServe())
 }
