@@ -23,7 +23,10 @@ func TestCRDUser(t *testing.T) {
 	dbp, err := database.New(user, password, "localhost", databaseName)
 
 	if err != nil {
-		t.Error("Could not create database connection: ", err)
+		dbp, err = database.New(user, password, "db", databaseName)
+		if err != nil {
+			t.Error("Could not create database connection: ", err)
+		}
 	}
 	err = dbp.DeleteAll("users")
 
@@ -93,10 +96,18 @@ func TestCRDUser(t *testing.T) {
 	if err != nil {
 		t.Error("could not delete row:", err)
 	}
-	err = dbp.DeleteAll("users")
-	if err != nil {
-		t.Error("Could not insert model: ", err)
-	}
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "markets")
 }
 
 func TestDeveloperOneToOne(t *testing.T) {
@@ -113,7 +124,10 @@ func TestDeveloperOneToOne(t *testing.T) {
 	dbp, err := database.New(user, password, "localhost", databaseName)
 
 	if err != nil {
-		t.Error("Could not create database connection: ", err)
+		dbp, err = database.New(user, password, "db", databaseName)
+		if err != nil {
+			t.Error("Could not create database connection: ", err)
+		}
 	}
 
 	var TestUserModel = &Models.User{Login: "foo", Password: "bar"}
@@ -124,7 +138,12 @@ func TestDeveloperOneToOne(t *testing.T) {
 		t.Error("Could not insert model: ", err)
 	}
 
-	defer dbp.DeleteAll("users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
 
 	var rows *pgx.Rows
 
@@ -166,8 +185,12 @@ func TestUpdateModel(t *testing.T) {
 	}
 
 	dbp, err := database.New(user, password, "localhost", databaseName)
+
 	if err != nil {
-		t.Error("Could not create database connection: ", err)
+		dbp, err = database.New(user, password, "db", databaseName)
+		if err != nil {
+			t.Error("Could not create database connection: ", err)
+		}
 	}
 
 	var TestUserModel = &Models.User{Login: "foo", Password: "bar"}
@@ -178,7 +201,12 @@ func TestUpdateModel(t *testing.T) {
 		t.Error("Could not insert model: ", err)
 	}
 
-	defer dbp.DeleteAll("users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
 
 	var rows *pgx.Rows
 

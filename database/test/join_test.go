@@ -120,8 +120,18 @@ func TestManyToOne(t *testing.T) {
 		t.Error("couldn't vanish markets: ", err)
 	}
 
-	defer dbp.DeleteAll("users")
-	defer dbp.DeleteAll("markets")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "markets")
 
 	err = dbp.Create("users", TestUserModel)
 
@@ -226,20 +236,18 @@ func TestManyToOne(t *testing.T) {
 }
 
 func Vanish(dbp *database.Database, t *testing.T) {
-	err := dbp.DeleteAll("users")
-
-	if err != nil {
-		t.Error("couldn't vanish users: ", err)
-	}
-
-	err = dbp.DeleteAll("markets")
-
-	if err != nil {
-		t.Error("couldn't vanish markets: ", err)
-	}
-
-	defer dbp.DeleteAll("users")
-	defer dbp.DeleteAll("markets")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "markets")
 }
 
 func TestJoint(t *testing.T) {

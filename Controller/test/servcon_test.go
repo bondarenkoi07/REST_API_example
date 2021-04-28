@@ -36,6 +36,15 @@ func TestCreateHandler(t *testing.T) {
 
 	controller = Controller.NewController()
 
+	err = controller.Service.UserService.DeleteAll()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	err = controller.Service.MarketService.DeleteAll()
+	if err != nil {
+		t.Error(err.Error())
+	}
+
 	rr := httptest.NewRecorder()
 
 	controller.Router.ServeHTTP(rr, req)
@@ -163,5 +172,14 @@ func TestDeleteHandler(t *testing.T) {
 
 	if rr.Code != http.StatusBadRequest {
 		t.Error(rr.Code, rr.Body.String())
+	}
+
+	err = controller.Service.UserService.DeleteAll()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	err = controller.Service.MarketService.DeleteAll()
+	if err != nil {
+		t.Error(err.Error())
 	}
 }

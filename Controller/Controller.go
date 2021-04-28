@@ -12,14 +12,14 @@ import (
 )
 
 type Controller struct {
-	service Service.Service
+	Service Service.Service
 	Router  *mux.Router
 }
 
 func NewController() Controller {
 	var controller Controller
 	r := mux.NewRouter()
-	controller.service = Service.NewService()
+	controller.Service = Service.NewService()
 
 	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.Create).Methods(http.MethodPost)
 	r.HandleFunc("/api/{table:[A-Za-z]+}", controller.ReadAll).Methods(http.MethodGet)
@@ -55,14 +55,14 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Product
 
-			err, user = c.service.ProductService.Deserialize(data, *c.service.DeveloperService, *c.service.MarketService)
+			err, user = c.Service.ProductService.Deserialize(data, *c.Service.DeveloperService, *c.Service.MarketService)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			err = c.service.ProductService.Create(user)
+			err = c.Service.ProductService.Create(user)
 		case "users":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -73,14 +73,14 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.User
 
-			err, user = c.service.UserService.Deserialize(data)
+			err, user = c.Service.UserService.Deserialize(data)
 
 			log.Println(user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			err = c.service.UserService.Create(user)
+			err = c.Service.UserService.Create(user)
 		case "developers":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -91,13 +91,13 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Developer
 
-			err, user = c.service.DeveloperService.Deserialize(data, *c.service.UserService)
+			err, user = c.Service.DeveloperService.Deserialize(data, *c.Service.UserService)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			err = c.service.DeveloperService.Create(user)
+			err = c.Service.DeveloperService.Create(user)
 		case "markets":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -108,13 +108,13 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Market
 
-			user, err = c.service.MarketService.Deserialize(data)
+			user, err = c.Service.MarketService.Deserialize(data)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			err = c.service.MarketService.Create(user)
+			err = c.Service.MarketService.Create(user)
 		default:
 			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
@@ -124,7 +124,7 @@ func (c Controller) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet{
+	if r.Method != http.MethodGet {
 		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -133,13 +133,13 @@ func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 	var data interface{}
 	switch pathVars["table"] {
 	case "markets":
-		data, err = c.service.MarketService.ReadAll()
+		data, err = c.Service.MarketService.ReadAll()
 	case "product":
-		data, err = c.service.ProductService.ReadAll()
+		data, err = c.Service.ProductService.ReadAll()
 	case "developers":
-		data, err = c.service.DeveloperService.ReadAll()
+		data, err = c.Service.DeveloperService.ReadAll()
 	case "users":
-		data, err = c.service.UserService.ReadAll()
+		data, err = c.Service.UserService.ReadAll()
 	default:
 		http.Error(w, "table does not exist", http.StatusBadRequest)
 	}
@@ -148,7 +148,7 @@ func (c Controller) ReadAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet{
+	if r.Method != http.MethodGet {
 		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -161,13 +161,13 @@ func (c Controller) ReadById(w http.ResponseWriter, r *http.Request) {
 	}
 	switch pathVars["table"] {
 	case "markets":
-		data, err = c.service.MarketService.ReadOne(int64(id))
+		data, err = c.Service.MarketService.ReadOne(int64(id))
 	case "product":
-		data, err = c.service.ProductService.ReadOne(int64(id))
+		data, err = c.Service.ProductService.ReadOne(int64(id))
 	case "developers":
-		data, err = c.service.DeveloperService.ReadOne(int64(id))
+		data, err = c.Service.DeveloperService.ReadOne(int64(id))
 	case "users":
-		data, err = c.service.UserService.ReadOne(int64(id))
+		data, err = c.Service.UserService.ReadOne(int64(id))
 	default:
 		http.Error(w, "table does not exist", http.StatusBadRequest)
 	}
@@ -204,14 +204,14 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.User
 
-			err, user = c.service.UserService.Deserialize(data)
+			err, user = c.Service.UserService.Deserialize(data)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			err = c.service.UserService.Update(user, int64(Id))
+			err = c.Service.UserService.Update(user, int64(Id))
 		case "developers":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -222,14 +222,14 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Developer
 
-			err, user = c.service.DeveloperService.Deserialize(data, *c.service.UserService)
+			err, user = c.Service.DeveloperService.Deserialize(data, *c.Service.UserService)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			err = c.service.DeveloperService.Update(user, int64(Id))
+			err = c.Service.DeveloperService.Update(user, int64(Id))
 		case "product":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -240,14 +240,14 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Product
 
-			err, user = c.service.ProductService.Deserialize(data, *c.service.DeveloperService, *c.service.MarketService)
+			err, user = c.Service.ProductService.Deserialize(data, *c.Service.DeveloperService, *c.Service.MarketService)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			err = c.service.ProductService.Update(user, int64(Id))
+			err = c.Service.ProductService.Update(user, int64(Id))
 		case "markets":
 			var data = make(map[string]string)
 			err = json.NewDecoder(r.Body).Decode(&data)
@@ -258,14 +258,14 @@ func (c Controller) Update(w http.ResponseWriter, r *http.Request) {
 
 			var user Models.Market
 
-			user, err = c.service.MarketService.Deserialize(data)
+			user, err = c.Service.MarketService.Deserialize(data)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			err = c.service.MarketService.Update(user, int64(Id))
+			err = c.Service.MarketService.Update(user, int64(Id))
 
 		default:
 			http.Error(w, "table does not exist", http.StatusBadRequest)
@@ -284,13 +284,13 @@ func (c Controller) DeleteAll(w http.ResponseWriter, r *http.Request) {
 		var err error
 		switch pathVars["table"] {
 		case "markets":
-			err = c.service.MarketService.DeleteAll()
+			err = c.Service.MarketService.DeleteAll()
 		case "product":
-			err = c.service.ProductService.DeleteAll()
+			err = c.Service.ProductService.DeleteAll()
 		case "developers":
-			err = c.service.DeveloperService.DeleteAll()
+			err = c.Service.DeveloperService.DeleteAll()
 		case "users":
-			err = c.service.UserService.DeleteAll()
+			err = c.Service.UserService.DeleteAll()
 		default:
 			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
@@ -308,18 +308,18 @@ func (c Controller) DeleteById(w http.ResponseWriter, r *http.Request) {
 		}
 		switch pathVars["table"] {
 		case "markets":
-			err = c.service.MarketService.DeleteOne(int64(id))
+			err = c.Service.MarketService.DeleteOne(int64(id))
 		case "product":
-			err = c.service.ProductService.DeleteOne(int64(id))
+			err = c.Service.ProductService.DeleteOne(int64(id))
 		case "developers":
-			err = c.service.DeveloperService.DeleteOne(int64(id))
+			err = c.Service.DeveloperService.DeleteOne(int64(id))
 		case "users":
-			err = c.service.UserService.DeleteOne(int64(id))
+			err = c.Service.UserService.DeleteOne(int64(id))
 		default:
 			http.Error(w, "table does not exist", http.StatusBadRequest)
 		}
 		utils.RespondJSON(w, map[string]string{"status": "deleted"}, err)
-	}else {
+	} else {
 		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -339,9 +339,9 @@ func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
 		case "product":
 			switch pathVars["f_key"] {
 			case "markets":
-				data, err = c.service.ProductService.FilterProductsByMarket(Id)
+				data, err = c.Service.ProductService.FilterProductsByMarket(Id)
 			case "developers":
-				data, err = c.service.ProductService.FilterProductsByDeveloper(Id)
+				data, err = c.Service.ProductService.FilterProductsByDeveloper(Id)
 			default:
 				http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
 				return
@@ -349,7 +349,7 @@ func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
 		case "developers":
 			switch pathVars["f_key"] {
 			case "markets":
-				data, err = c.service.DeveloperService.FilterDevelopers(Id)
+				data, err = c.Service.DeveloperService.FilterDevelopers(Id)
 			default:
 				http.Error(w, "where is any constraints based on this table or table does not exist", http.StatusBadRequest)
 				return
@@ -360,7 +360,7 @@ func (c Controller) FilterProducts(w http.ResponseWriter, r *http.Request) {
 		}
 
 		utils.RespondJSON(w, data, err)
-	}else {
+	} else {
 		http.Error(w, "Method are not allowed", http.StatusMethodNotAllowed)
 		return
 	}

@@ -51,7 +51,18 @@ func TestSave(t *testing.T) {
 		}
 		IDs = append(IDs, id)
 	}
-	defer dbp.DeleteAll(testModels[0].table)
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "markets")
 	for i := 0; i < len(IDs)-1; i++ {
 		if !(IDs[i+1]-IDs[i] == 1) {
 			t.Error("Id do not make up sequence")

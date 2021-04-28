@@ -72,6 +72,19 @@ func TestGetMarketProducts(t *testing.T) {
 		t.Errorf("Error: %v", err)
 	}
 
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "users")
+	defer func(dbp *database.Database, tableName string) {
+		err := dbp.DeleteAll(tableName)
+		if err != nil {
+			t.Error(err)
+		}
+	}(dbp, "markets")
+
 	id, err := UserService.Save(user)
 
 	if err != nil {
@@ -151,5 +164,4 @@ func TestGetMarketProducts(t *testing.T) {
 			t.Error("Wrong Model fetched")
 		}
 	}
-
 }
