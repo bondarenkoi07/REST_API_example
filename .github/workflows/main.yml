@@ -11,4 +11,4 @@ jobs:
       - name: Build the stack
         run: docker-compose -f docker-compose.yml up -d --build
       - name: Test
-        run: docker-compose exec web go test ./...
+        run: docker-compose exec web go test -json ./... > test.json
