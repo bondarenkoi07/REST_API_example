@@ -125,4 +125,8 @@ func NewController() Controller {
 
 ### package Utils
 
-This package contains small func responible for final request and response handling (encode/decode JSON, writing HTTP body, etc.)
+This package contains small funcs working with HTTP Request/Response (encode/decode JSON, writing HTTP body, etc.)
+
+## Tests
+
+Several testing of app units using standart Go `testing` (search files in test/Test directories) and with [Postman](https://www.postman.com/) app were carried out. 
